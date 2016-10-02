@@ -1,0 +1,10 @@
+.transition-table {
+  border-collapse: collapse;
+  border: 1px solid #d8d8d8;
+  background: #efefef; }
+  .transition-table thead > tr > th {
+    background: #2196F3;
+    border: 0; }
+  .transition-table tbody > tr > td {
+    padding: 5px;
+    border: 1px solid #d8d8d8; }

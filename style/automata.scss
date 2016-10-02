@@ -1,0 +1,17 @@
+
+$c_fondo: #222222;
+
+
+.transition-table{
+  border-collapse: collapse;
+  border:1px solid #d8d8d8;
+  background: #efefef;
+  thead>tr>th{
+    background: #2196F3;
+    border:0;
+  }
+  tbody>tr>td{
+    padding: 5px;
+    border:1px solid #d8d8d8;
+  }
+}

@@ -6,16 +6,19 @@
     <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="angular.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" href="style/automata.css/automata.css" media="screen" title="no title">
   </head>
   <body ng-app="Automatas" ng-controller="automatasController as ctrl">
-    <table>
-      <tr><td><input type="text" ng-model="automataForm.e" placeholder="Σ (Alfabeto)"></td></tr>
-      <tr><td><input type="text" ng-model="automataForm.q" placeholder="Q (Estados)"></td></tr>
-        <tr><td><input type="text" ng-model="automataForm.s" placeholder="Q0 (Estado inicial)"></td></tr>
-        <tr><td><input type="text" ng-model="automataForm.f" placeholder="F (Estados finales)"></td></tr>
-      <tr>  <td><textarea ng-model="automataForm.d" placeholder="δ (Función de transición)"></textarea></td></tr>
+    <table class="automato-form">
+      <tbody>
+        <tr><td>Estados</td><td><input type="text" ng-model="automataForm.q" placeholder="Q (Estados)"></td></tr>
+        <tr><td>Alfabeto</td><td><input type="text" ng-model="automataForm.e" placeholder="Σ (Alfabeto)"></td></tr>
+        <tr><td>Estado inicial</td><td><input type="text" ng-model="automataForm.s" placeholder="Q0 (Estado inicial)"></td></tr>
+        <tr><td>Estados finales</td><td><input type="text" ng-model="automataForm.f" placeholder="F (Estados finales)"></td></tr>
+        <tr><td>Función de transición</td> <td><textarea ng-change="getDatosTextarea()" ng-model="automataForm.d" id="container_text" placeholder="δ (Función de transición)"></textarea></td></tr>
+      </tbody>
     </table>
-    <table border="1">
+    <table border="1" class="transition-table">
       <thead>
         <tr>
           <th rowspan="2">Estado</th>
@@ -34,23 +37,24 @@
         </tr>
       </tbody>
     </table>
-    <button type="button" ng-click="processForm()">Procesar</button>
+    <!-- <button type="button" ng-click="processForm()">Procesar</button> -->
     <br>
 
     <!-- <pre>      {{file.data}}    </pre> -->
-    <textarea name="name" id="container_text"></textarea>
+    <!-- <textarea name="name" id="container_text" ></textarea> -->
+    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
+    <button type="button" name="button" ng-click="getDatosTextarea()">Procesar</button>
     <br>
     <input type="text" ng-model="est" placeholder="Estado">
     <input type="text" ng-model="ent" placeholder="Entrada">
     <button type="button" ng-click="check()">Checar</button>
     <span>{{resultCheck}}</span>
-    <!-- <pre>{{automataForm | json:4}}</pre> -->
+    <br><br><br>
+    <input type="text" ng-model="cadena"><button type="button" ng-click="validar()">Validar</button> {{totalFinales}}
+    <pre>{{resultado | json:2}}</pre>
     <!-- <pre>{{automata | json:4}}</pre><br><br> -->
     <pre><code>{{automataWork | json:4}}</code></pre><br><br>
 
-    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
-    <div id='output'>
-    ...
-    </div>
+
   </body>
 </html>
