@@ -10,6 +10,7 @@ App.controller('automatasController', ['$scope', function($scope){
   $scope.est = "";
   $scope.resultCheck = "";
   $scope.resultado = {};
+  $scope.transiciones = [];
   $scope.totalFinales = 0;
   $scope.processForm = function(){
     angular.copy($scope.automataForm, $scope.automataWork);
@@ -64,7 +65,10 @@ App.controller('automatasController', ['$scope', function($scope){
     if(angular.isUndefined($scope.automataWork.d)) return false;
     if(angular.isUndefined($scope.automataWork.d[estado])) return false;
     if(angular.isUndefined($scope.automataWork.d[estado][entrada])) return false;
-    return {hojas: $scope.automataWork.d[estado][entrada]};
+    // return {hojas: $scope.automataWork.d[estado][entrada]};
+    var transition = estado+","+entrada+","+$scope.automataWork.d[estado][entrada].join('|');
+    $scope.transiciones.push(transition)
+    return $scope.automataWork.d[estado][entrada];
   }
   function contarFinales(arreglo_estados){
     var total = 0;
@@ -79,7 +83,14 @@ App.controller('automatasController', ['$scope', function($scope){
     return ($scope.automataWork.f.indexOf(estado) !== -1);
   }
 
+  $scope.showTipo = function(estado){//inicial y final
+    if(($scope.automataWork.f.indexOf(estado) !== -1)) return "*";
+    if(($scope.automataWork.s == estado)) return "→";
+  }
+
   $scope.validar = function(){
+    $scope.transiciones.length = 0;
+    $scope.totalFinales = 0;
     $scope.resultado = validarPalabra($scope.cadena);
     console.dir($scope.resultado);
   }
@@ -93,20 +104,27 @@ App.controller('automatasController', ['$scope', function($scope){
     //if(cadena.length == 0) return cadena;
     if(cadena.length == 1) {
       $scope.totalFinales += contarFinales(getDestinos(estado, cadena));
-      return getDestinos(estado, cadena);
+      var res = {};
+      res[cadena] =  getDestinos(estado, cadena);
+      // return getDestinos(estado, cadena);
+      return res;
     }
     var estadosNuevos = getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
     var arbol =  {};
-    var caminos = [];
+    var caminos = {};
     //totalFinales += contarFinales(caminos);
     //arbol[estado] = {caminos: []};
-    angular.forEach(estadosNuevos.hojas, function(v,k){
+    angular.forEach(estadosNuevos, function(v,k){
       console.log("Estado nuevo: " + v);
-      caminos.push(validarPalabra(cadena.substr(1, cadena.length), v));
+      var first =  cadena.charAt(0);
+      var resto = cadena.substr(1, cadena.length);
+      if(angular.isUndefined(caminos[first])) caminos[first] = {};
+      caminos[first][v] = validarPalabra(resto, v)
+      // caminos.push(validarPalabra(cadena.substr(1, cadena.length), v));
       //arbol[estado].caminos.push(validarPalabra(cadena.substr(1, cadena.length), v) );
     });
-    arbol.ramas = caminos;
-    return arbol;
+    // arbol.ramas = caminos;
+    return caminos;
   }
 
 }]);
