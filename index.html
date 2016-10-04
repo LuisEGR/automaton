@@ -21,7 +21,8 @@
                 <input type='file' accept='text/plain' onchange='openFile(event)'>
               </td>
               <td>
-                <button type="button" name="button" ng-click="getDatosTextarea()">Procesar</button>
+                <button type="button" name="button" ng-click="getDatosTextarea()">Extraer</button>
+                <button type="button" name="button" ng-click="processForm()">Procesar</button>
               </td>
             </tr>
             <tr>
@@ -29,7 +30,8 @@
                 <textarea  id="automata" placeholder="Automata"></textarea>
               </td>
             </tr>
-            <tr><td><input type="text" ng-model="automataForm.q" placeholder="Q (Estados)"></td><td rowspan="6" ><textarea class="h100" ng-change="getDatosTextarea()" ng-model="automataForm.d" placeholder="δ (Función de transición)"></textarea></tr>
+            <tr><td><input type="text" ng-model="automataForm.q" placeholder="Q (Estados)"></td>
+            <td rowspan="6" ><textarea class="h100" ng-model="automataForm.d" placeholder="δ (Función de transición)"></textarea></tr>
             <tr><td><input type="text" ng-model="automataForm.e" placeholder="Σ (Alfabeto)"></td></tr>
             <tr><td><input type="text" ng-model="automataForm.s" placeholder="Q0 (Estado inicial)"></td></tr>
             <tr><td><input type="text" ng-model="automataForm.f" placeholder="F (Estados finales)"></td></tr>
@@ -43,10 +45,10 @@
     <section>
       <h2>Tabla de transición</h2>
       <div class="table-container">
-      <table border="1" class="transition-table">
+      <table class="transition-table">
         <thead>
           <tr>
-            <th rowspan="2">Estado</th>
+            <th rowspan="2" style=" width: 84px;">Estado</th>
             <th colspan="{{automata.alfabeto.length}}">Entrada</th>
             <!-- <th ng-repeat="entrada in automataWork.e">{{letra}}</th> -->
           </tr>
@@ -56,7 +58,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="transicion in automata.funcionTransicion">
-            <td>{{showTipo(automataWork.q[$index])}} {{automata.estados[$index]}}</td>
+            <td style="text-align:right">{{showTipo(automata.estados[$index])}} {{automata.estados[$index]}}</td>
             <td ng-repeat="letra in automata.alfabeto">{{transicion[letra].join(',')}}</td>
             <!-- <td ng-repeat="funcion in transicion">{{transicion.}}</td> -->
           </tr>
@@ -68,8 +70,21 @@
     <section>
       <h2>Validación de palabra</h2>
 
-      <input type="text" ng-model="cadena"><button type="button" ng-click="validar()">Validar</button> {{totalFinales}} <span ng-if="totalFinales">Es válida!</span>
+      <input type="text" ng-model="cadena"><button type="button" ng-click="validar()">Validar</button>
+      {{totalFinales}} <span ng-if="totalFinales">Es válida!</span> <span ng-if="!totalFinales">NO es válida!</span>
     </section>
+  <br>
+  <section>
+    <h2>Gráfico</h2>
+    <svg width="100" height="100" ng-repeat="estado in automata.estados" id=e_{{estado}}>
+      <circle cx="50" cy="50" r="40" stroke="black" stroke-width="2" fill="white" />
+    </svg>
+
+    <div class="estado" ng-repeat="estado in automata.estados" id=e_{{estado}}>
+      {{estado}}
+    </div>
+    <!-- <canvas id="automataPlot" width="800" height="500"></canvas> -->
+  </section>
   <br>
     <section>
       <pre>{{resultado | json:5}}</pre><br><br>

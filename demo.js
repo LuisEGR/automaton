@@ -13,6 +13,8 @@ App.controller('automatasController', ['$scope', function($scope){
   $scope.transiciones = [];
   $scope.totalFinales = 0;
   $scope.automata = {};
+  $scope.coordenadas = [];
+
   $scope.processForm = function(){
     var Δ = {};
     angular.forEach( $scope.automataForm.d.split('\n'), function(v,k){//Por cada transición
@@ -37,6 +39,7 @@ App.controller('automatasController', ['$scope', function($scope){
 
     console.dir($scope.automata);
     $scope.automata.print(); // Consola
+    $scope.automata.dibujar('automataPlot');
 
   }
 
@@ -49,8 +52,9 @@ App.controller('automatasController', ['$scope', function($scope){
     $scope.automataForm.f = datos[3];
     $scope.automataForm.d = datos.slice(4,datos.length).join('\n');
     console.log(datos);
-    $scope.processForm();
+    //$scope.processForm();
   }
+
 
 
   $scope.showTipo = function(estado){//inicial y final
@@ -59,15 +63,27 @@ App.controller('automatasController', ['$scope', function($scope){
     if(($scope.automataForm.s == estado)) return "→";
   }
 
-  // $scope.showTipo = function(estado){//inicial y final
-  //   if(($scope.automataWork.f.indexOf(estado) !== -1)) return "*";
-  //   if(($scope.automataWork.s == estado)) return "→";
+  // getCoordenadas = function(estado){
+  //   console.log($('#e_'+estado));
   // }
+  //
+  // getAllCoordenadas = function(){
+  //   $scope.coordenadas.length = 0;
+  //   angular.forEach($scope.automata.estados, function(estado){
+  //     getCoordenadas(estado);
+  //     //$scope.coordenadas.push()
+  //   });
+  // }
+
+
 
   $scope.validar = function(){
     $scope.transiciones.length = 0;
-    $scope.totalFinales = 0;
+
     $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
+    $scope.totalFinales = $scope.automata.totalFinales;
+    $scope.transiciones = $scope.automata.transiciones;
+    $scope.automata.dibujar('automataPlot');
     // $scope.resultado = validarPalabra($scope.cadena);
     console.dir($scope.resultado);
   }

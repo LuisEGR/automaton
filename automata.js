@@ -19,12 +19,12 @@ function Automata(struct){
       if(angular.isUndefined(this.funcionTransicion[estado][entrada])) return false;//'ERROR_NO_TRANSICION';
       // return {hojas: $scope.automataWork.d[estado][entrada]};
       var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada].join('|');
-      this.transiciones.push(transition);
+      self.transiciones.push(transition);
       return this.funcionTransicion[estado][entrada];
   }
 
   this.esFinal = function(estado){
-    return (this.estadosF.indexOf(estado) !== -1);
+    return (self.estadosF.indexOf(estado) !== -1);
   }
 
   this.contarFinales = function(arreglo_estados){
@@ -39,14 +39,18 @@ function Automata(struct){
 
   this.validarPalabra = function(cadena,estado){
     console.log("doValidar");
-    if(angular.isUndefined(estado)) estado =  this.estadoI;//estado inicial
+    if(angular.isUndefined(estado)){
+      self.totalFinales = 0;
+      self.transiciones.length = 0;
+      estado =  this.estadoI;//estado inicial
+    }
     if(cadena.length == 1) {
-      this.totalFinales += this.contarFinales(this.getDestinos(estado, cadena));
+      self.totalFinales += self.contarFinales(this.getDestinos(estado, cadena));
       var res = {};
-      res[cadena] =  this.getDestinos(estado, cadena);
+      res[cadena] =  self.getDestinos(estado, cadena);
       return res;
     }
-    var estadosNuevos = this.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
+    var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
     var arbol =  {};
     var caminos = {};
     angular.forEach(estadosNuevos, function(v,k){
@@ -57,6 +61,57 @@ function Automata(struct){
       caminos[first][v] = self.validarPalabra(resto, v)
     });
     return caminos;
+  }
+
+
+  this.dibujar = function(canvasID){
+      var c=document.getElementById(canvasID);
+      var ctx=c.getContext("2d");
+      ctx.clearRect(0, 0, c.width, c.height);//limpiar
+      ctx.beginPath();
+      var x = 0;
+      var y = 0;
+      var separation = 200;
+      var estados = [];
+      for(var i = 0; i < self.estados.length; i++){
+        //get position
+        if(i == 0){
+          x = 30;
+          y = 30;
+        }else{
+          if((x+separation) < (c.width + 10)){
+            x = x+separation;
+          }else{
+            y = y+separation;
+            x = 30;
+            moveTo(x,y);
+          }
+        }
+        estados.push({e: self.estados[i], pos: {x:x, y:y}});
+        ctx.moveTo(x+30, y);
+        ctx.arc(x,y,30,0,2*Math.PI);
+        //ctx.fill();
+        ctx.closePath();
+        //ctx = c.getContext("2d");
+        ctx.moveTo(x, y);
+        ctx.textAlign="center";
+        ctx.fillStyle = 'black';
+        ctx.font = "30px Montserrat ";
+        ctx.fillText(self.estados[i],x ,y + 8);
+
+      }
+      ctx.stroke();
+      console.dir(estados);
+
+      // ctx.arc(100,75,30,0,2*Math.PI);
+      // ctx.fillStyle = 'white';
+      // ctx.fill();
+      // ctx.fillStyle = 'black';
+      // ctx.font = "30px Montserrat";
+      // ctx.fillText("1",100 -10 ,75 + 8);
+
+
+
   }
 
 }
