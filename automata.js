@@ -8,6 +8,8 @@ function Automata(struct){
   this.funcionTransicion = struct.d;
   this.transiciones = [];
   this.totalFinales = 0;
+  self.coordenadas = [];
+
   this.print = function(){
     console.dir(this);
   }
@@ -63,55 +65,79 @@ function Automata(struct){
     return caminos;
   }
 
-
-  this.dibujar = function(canvasID){
-      var c=document.getElementById(canvasID);
-      var ctx=c.getContext("2d");
-      ctx.clearRect(0, 0, c.width, c.height);//limpiar
-      ctx.beginPath();
-      var x = 0;
-      var y = 0;
-      var separation = 200;
-      var estados = [];
-      for(var i = 0; i < self.estados.length; i++){
-        //get position
-        if(i == 0){
-          x = 30;
-          y = 30;
-        }else{
-          if((x+separation) < (c.width + 10)){
-            x = x+separation;
-          }else{
-            y = y+separation;
-            x = 30;
-            moveTo(x,y);
-          }
+  //Genera un conjunto de coordenadas para posicionar los estados
+  this.generarCoordenadas = function(){
+    self.coordenadas.length = 0;
+    console.dir(self.estados);
+    // total = self.estados.length;
+    totalX = Math.floor(Math.sqrt(self.estados.length));
+    totalY = Math.ceil(Math.sqrt(self.estados.length));
+    console.dir(totalX);
+    console.dir(totalY);
+    if((totalX * totalY) < self.estados.length) totalX += (self.estados.length - (totalX * totalY));
+    for(var i = 0; i < totalX; i++){
+      for (var j = 0; j < totalY; j++) {
+        var coord = {
+          x: i*300 + 50,
+          y: j*250 + 50
         }
-        estados.push({e: self.estados[i], pos: {x:x, y:y}});
-        ctx.moveTo(x+30, y);
-        ctx.arc(x,y,30,0,2*Math.PI);
-        //ctx.fill();
-        ctx.closePath();
-        //ctx = c.getContext("2d");
-        ctx.moveTo(x, y);
-        ctx.textAlign="center";
-        ctx.fillStyle = 'black';
-        ctx.font = "30px Montserrat ";
-        ctx.fillText(self.estados[i],x ,y + 8);
-
+        self.coordenadas.push(coord);
       }
-      ctx.stroke();
-      console.dir(estados);
+    }
 
-      // ctx.arc(100,75,30,0,2*Math.PI);
-      // ctx.fillStyle = 'white';
-      // ctx.fill();
-      // ctx.fillStyle = 'black';
-      // ctx.font = "30px Montserrat";
-      // ctx.fillText("1",100 -10 ,75 + 8);
-
-
+    console.dir(self.coordenadas);
+    return self.coordenadas;
 
   }
+
+  // this.dibujar = function(canvasID){
+  //     var c=document.getElementById(canvasID);
+  //     var ctx=c.getContext("2d");
+  //     ctx.clearRect(0, 0, c.width, c.height);//limpiar
+  //     ctx.beginPath();
+  //     var x = 0;
+  //     var y = 0;
+  //     var separation = 200;
+  //     var estados = [];
+  //     for(var i = 0; i < self.estados.length; i++){
+  //       //get position
+  //       if(i == 0){
+  //         x = 30;
+  //         y = 30;
+  //       }else{
+  //         if((x+separation) < (c.width + 10)){
+  //           x = x+separation;
+  //         }else{
+  //           y = y+separation;
+  //           x = 30;
+  //           moveTo(x,y);
+  //         }
+  //       }
+  //       estados.push({e: self.estados[i], pos: {x:x, y:y}});
+  //       ctx.moveTo(x+30, y);
+  //       ctx.arc(x,y,30,0,2*Math.PI);
+  //       //ctx.fill();
+  //       ctx.closePath();
+  //       //ctx = c.getContext("2d");
+  //       ctx.moveTo(x, y);
+  //       ctx.textAlign="center";
+  //       ctx.fillStyle = 'black';
+  //       ctx.font = "30px Montserrat ";
+  //       ctx.fillText(self.estados[i],x ,y + 8);
+  //
+  //     }
+  //     ctx.stroke();
+  //     console.dir(estados);
+  //
+  //     // ctx.arc(100,75,30,0,2*Math.PI);
+  //     // ctx.fillStyle = 'white';
+  //     // ctx.fill();
+  //     // ctx.fillStyle = 'black';
+  //     // ctx.font = "30px Montserrat";
+  //     // ctx.fillText("1",100 -10 ,75 + 8);
+  //
+  //
+  //
+  // }
 
 }

@@ -36,10 +36,10 @@ App.controller('automatasController', ['$scope', function($scope){
       f: $scope.automataForm.f.split(','),
       d: Δ
     });
-
     console.dir($scope.automata);
     $scope.automata.print(); // Consola
-    $scope.automata.dibujar('automataPlot');
+    // $scope.automata.dibujar('automataPlot');
+    $scope.coordenadas = $scope.automata.generarCoordenadas();
 
   }
 
@@ -83,7 +83,8 @@ App.controller('automatasController', ['$scope', function($scope){
     $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
     $scope.totalFinales = $scope.automata.totalFinales;
     $scope.transiciones = $scope.automata.transiciones;
-    $scope.automata.dibujar('automataPlot');
+    // $scope.automata.dibujar('automataPlot');
+
     // $scope.resultado = validarPalabra($scope.cadena);
     console.dir($scope.resultado);
   }

@@ -76,13 +76,17 @@
   <br>
   <section>
     <h2>Gráfico</h2>
-    <svg width="100" height="100" ng-repeat="estado in automata.estados" id=e_{{estado}}>
-      <circle cx="50" cy="50" r="40" stroke="black" stroke-width="2" fill="white" />
-    </svg>
+    <pre>
+      {{coordenadas | json}}
+    </pre>
+    <svg width="800" height="600" ng-if="coordenadas">
+        <circle ng-attr-cx="{{coordenadas[$index].x}}" ng-attr-cy="{{coordenadas[$index].y}}" r="40" stroke="black" stroke-width="2" fill="white" ng-repeat="estado in automata.estados" id=e_{{estado}}>  </circle>
+        <text ng-attr-x="{{coordenadas[$index].x}}" ng-attr-y="{{coordenadas[$index].y}}" stroke="#676767" stroke-width="1px" dy=".4em"  dx="-5px" font-size="20" ng-repeat="estado in automata.estados">{{estado}}</text>
 
-    <div class="estado" ng-repeat="estado in automata.estados" id=e_{{estado}}>
+    </svg>
+    <!-- <div class="estado" ng-repeat="estado in automata.estados" id=e_{{estado}}>
       {{estado}}
-    </div>
+    </div> -->
     <!-- <canvas id="automataPlot" width="800" height="500"></canvas> -->
   </section>
   <br>
