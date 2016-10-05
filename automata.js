@@ -6,12 +6,51 @@ function Automata(struct){
   this.estadoI = struct.s;
   this.estadosF = struct.f;
   this.funcionTransicion = struct.d;
+  this.funcionInversa = struct.di;
   this.transiciones = [];
   this.totalFinales = 0;
+  this.finalesAlcanzados = [];
   self.coordenadas = [];
-
+  this.rutaInvers = "";
   this.print = function(){
     console.dir(this);
+  }
+
+  function flatten(target, opts) {
+    opts = opts || {}
+
+    var delimiter = opts.delimiter || '→'
+    var maxDepth = opts.maxDepth
+    var output = {}
+
+    function step(object, prev, currentDepth) {
+      currentDepth = currentDepth ? currentDepth : 1
+      Object.keys(object).forEach(function(key) {
+        var value = object[key]
+        var isarray = opts.safe && Array.isArray(value)
+        var type = Object.prototype.toString.call(value)
+
+        var isobject = (
+          type === "[object Object]" ||
+          type === "[object Array]"
+        )
+
+        var newKey = prev
+          ? prev + delimiter + key
+          : key
+
+        if (!isarray && isobject && Object.keys(value).length &&
+          (!opts.maxDepth || currentDepth < maxDepth)) {
+          return step(value, newKey, currentDepth + 1)
+        }
+
+        output[newKey] = value
+      })
+    }
+
+    step(target)
+
+    return output
   }
 
   this.getDestinos =  function(estado, entrada){
@@ -23,6 +62,29 @@ function Automata(struct){
       var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada].join('|');
       self.transiciones.push(transition);
       return this.funcionTransicion[estado][entrada];
+  }
+
+  this.getDestinosInversos =  function(estado, entrada){
+      console.log("Get destino inverso: " + estado + "("+entrada+")");
+      if(angular.isUndefined(this.funcionInversa)) return false; //'ERROR_NO_ESTADO';
+      if(angular.isUndefined(this.funcionInversa[estado])) return false; //'ERROR_NO_ESTADO';
+      if(angular.isUndefined(this.funcionInversa[estado][entrada])) return false;//'ERROR_NO_TRANSICION';
+      // return {hojas: $scope.automataWork.d[estado][entrada]};
+      //var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada].join('|');
+      //self.transiciones.push(transition);
+      return this.funcionInversa[estado][entrada];
+  }
+
+  this.getRutaInversa = function(cadena, estado){
+    cadena = cadena.split("").reverse().join("");
+    console.log(cadena);
+    for(var i = 0; i<cadena.length; i++){
+      var nuevosEstados = self.getDestinosInversos(estado, cadena[i]);
+      for(var j = 0; j < nuevosEstados.length; j++){
+        self.rutaInversa += ""+nuevosEstados[j]+"_";
+      }
+      self.rutaInversa += "--";
+    }
   }
 
   this.esFinal = function(estado){
@@ -39,28 +101,44 @@ function Automata(struct){
     return total;
   }
 
+  this.agregarFinales = function(arr){
+    for(var i = 0; i < arr.length; i++){
+      if(self.esFinal(arr[i])){
+        //if(this.finalesAlcanzados.indexOf(arr[i]) == -1){
+          this.finalesAlcanzados.push(arr[i]);
+        //}
+      }
+    }
+  }
+  this.aplanar = function(obj){
+    return flatten(obj);
+  }
   this.validarPalabra = function(cadena,estado){
     console.log("doValidar");
     if(angular.isUndefined(estado)){
       self.totalFinales = 0;
       self.transiciones.length = 0;
       estado =  this.estadoI;//estado inicial
+
     }
     if(cadena.length == 1) {
       self.totalFinales += self.contarFinales(this.getDestinos(estado, cadena));
+      self.agregarFinales(this.getDestinos(estado, cadena));
       var res = {};
-      res[cadena] =  self.getDestinos(estado, cadena);
+      res[estado+'('+cadena+')'] =  self.getDestinos(estado, cadena);
       return res;
     }
     var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
     var arbol =  {};
-    var caminos = {};
+var caminos = {};
     angular.forEach(estadosNuevos, function(v,k){
       console.log("Estado nuevo: " + v);
       var first =  cadena.charAt(0);
       var resto = cadena.substr(1, cadena.length);
-      if(angular.isUndefined(caminos[first])) caminos[first] = {};
+      if(angular.isUndefined(caminos[first])) caminos[first] = [];
+      // if(angular.isUndefined(caminos[first])) caminos[first] = {};
       caminos[first][v] = self.validarPalabra(resto, v)
+      // caminos[first][v] = self.validarPalabra(resto, v)
     });
     return caminos;
   }
