@@ -23,8 +23,28 @@ App.controller('automatasController', ['$scope', function($scope){
   },true);
 
 
-
+  //Funciòn para procesar el formulario y crear el objeto de Automata con los datos procesados.
   $scope.processForm = function(){
+    //Primero creo la función de transición como un objeto de esta estructura:
+    /*
+    {
+          "0": {
+               "a": [
+                    "0",
+                    "1"
+               ],
+               "b": [
+                    "0"
+               ]
+          },
+          "1": {
+               "b": [
+                    "2"
+               ]
+          }
+     },
+     Donde del estado 0 con a manda a 0,1... etc
+     */
     var Δ = {};
     angular.forEach( $scope.automataForm.d.split('\n'), function(v,k){//Por cada transición
       var δ = v.split(','); // [a,1,d]
@@ -58,19 +78,20 @@ App.controller('automatasController', ['$scope', function($scope){
       s: $scope.automataForm.s,
       f: $scope.automataForm.f.split(','),
       d: Δ,
-      di: Δi
+      di: Δi//inversa
     });
-    console.dir($scope.automata);
+    //console.dir($scope.automata);
     $scope.automata.print(); // Consola
     // $scope.automata.dibujar('automataPlot');
     $scope.coordenadas = $scope.automata.generarCoordenadas();
 
   }
 
-  $scope.check = function(){
-    $scope.resultCheck = $scope.automata.getDestinosInversos($scope.est, $scope.ent);
-  }
+  // $scope.check = function(){
+  //   $scope.resultCheck = $scope.automata.getDestinosInversos($scope.est, $scope.ent);
+  // }
 
+  //Datos del textarea al formulario
   $scope.getDatosTextarea = function(){
     var datos = $('#automata').val().split('\n');
     $scope.automataForm.q = datos[0];
@@ -81,18 +102,19 @@ App.controller('automatasController', ['$scope', function($scope){
   }
 
 
-
+  //Obtengo el simbolo del tipo (inicial, final o inicial y final)
   $scope.showTipo = function(estado){//inicial y final
     if(($scope.automataForm.f.indexOf(estado) !== -1) && ($scope.automataForm.s == estado)) return "*→";
     if(($scope.automataForm.f.indexOf(estado) !== -1)) return "*";
     if(($scope.automataForm.s == estado)) return "→";
   }
 
+  //Comprobar si el camino es válido
   $scope.isValidPath = function(path){
     return $scope.automata.esFinal(path.charAt(path.length-1));
   }
 
-
+  //Validar la cadena (Desde el objeto de automata)
   $scope.validar = function(){
     if(angular.isUndefined($scope.cadena) || $scope.cadena.length == 0) return;
     $scope.transiciones.length = 0;

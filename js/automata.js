@@ -16,6 +16,7 @@ function Automata(struct){
     console.dir(this);
   }
 
+  // Convertir arreglo a objeto [] -> {}
   this.toObject = function(arreglo){
     var r = {};
     for(var i = 0; i < arreglo.length; i++){
@@ -24,64 +25,35 @@ function Automata(struct){
     return r;
   }
 
+  //Obtengo los destinos desde un estado con determinada entrada.
   this.getDestinos =  function(estado, entrada){
       // console.log("Get destino: " + estado + "("+entrada+")");
       if(angular.isUndefined(this.funcionTransicion)) return false; //'ERROR_NO_ESTADO';
       if(angular.isUndefined(this.funcionTransicion[estado])) return false; //'ERROR_NO_ESTADO';
       if(angular.isUndefined(this.funcionTransicion[estado][entrada+""])) return false;//'ERROR_NO_TRANSICION';
-      // return {hojas: $scope.automataWork.d[estado][entrada]};
       var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada+""].join('|');
       self.transiciones.push(transition);
       return this.funcionTransicion[estado][entrada+""];
   }
 
-  this.getDestinosInversos =  function(estado, entrada){
-      // console.log("Get destino inverso: " + estado + "("+entrada+")");
-      if(angular.isUndefined(this.funcionInversa)) return false; //'ERROR_NO_ESTADO';
-      if(angular.isUndefined(this.funcionInversa[estado])) return false; //'ERROR_NO_ESTADO';
-      if(angular.isUndefined(this.funcionInversa[estado][entrada])) return false;//'ERROR_NO_TRANSICION';
-      // return {hojas: $scope.automataWork.d[estado][entrada]};
-      //var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada].join('|');
-      //self.transiciones.push(transition);
-      return this.funcionInversa[estado][entrada];
-  }
-
-  this.getRutaInversa = function(cadena, estado){
-    cadena = cadena.split("").reverse().join("");
-    // console.log(cadena);
-    for(var i = 0; i<cadena.length; i++){
-      var nuevosEstados = self.getDestinosInversos(estado, cadena[i]);
-      for(var j = 0; j < nuevosEstados.length; j++){
-        self.rutaInversa += ""+nuevosEstados[j]+"_";
-      }
-      self.rutaInversa += "--";
-    }
-  }
-
+  //Comprueba si un estado es estado final
   this.esFinal = function(estado){
     return (self.estadosF.indexOf(estado) !== -1);
   }
 
+  //Cuenta cuantos estados finales hay en un arreglo de estados
   this.contarFinales = function(arreglo_estados){
     var total = 0;
     angular.forEach(arreglo_estados, function(estado){
-      if(self.esFinal(estado)){//si existe
+      if(self.esFinal(estado)){//si es final
         total+=1;
       }
     });
     return total;
   }
 
-  this.agregarFinales = function(arr){
-    for(var i = 0; i < arr.length; i++){
-      if(self.esFinal(arr[i])){
-        //if(this.finalesAlcanzados.indexOf(arr[i]) == -1){
-          this.finalesAlcanzados.push(arr[i]);
-        //}
-      }
-    }
-  }
-
+  //Une un arreglo con una estructura específica para
+  //mostrar los caminos de forma entendible
   this.jn = function(arr){
     var r = "";
     for(var i = 0; i<arr.length; i++){
@@ -93,31 +65,39 @@ function Automata(struct){
     }
     return r;
   }
+
+  //Aplana el objeto y a cada camino se le aplica un tratamiento
+  //como cadena para mostrarlos entendiblemente
   this.aplanar = function(obj){
+    //Convierto el objeto {"camino":"destinos"} a un arreglo de caminos ["camino→destinos", ...]
     var Arrplano = $.map(_flat(obj), function(value, index) {
         return [index+'→'+value];
     });
     var Arr2 = [];
-    for(var i = 0; i < Arrplano.length; i++){
+    for(var i = 0; i < Arrplano.length; i++){//por cada camino no bien formateado
       var all = Arrplano[i].split('→');
       var last = all[all.length-1].split(',');
       var arr_temp = all.slice(0, all.length -1);
       var tn = "";
-
       for(j=0;j<last.length; j++){
         Arr2.push(self.estadoI+self.jn(arr_temp)+'→'+last[j]);
-
       }
     }
     return Arr2;
   }
+
+  //Une, si es un arreglo entonces con join, si es false regresa ε
+  //de lo contrario regresa la entrada, por que es una cadena
   this.unir = function(arr_str){
       if(Array.isArray(arr_str)) return arr_str.join(',');
       if(arr_str == false) return 'ε';
       return arr_str;
   }
+
+  //Función recursiva para validar una palabra, recibe como parametros
+  //la cadena y el estado, este último es opcional, y en caso de que no exista
+  //Se tomará el estado inicial.
   this.validarPalabra = function(cadena,estado){
-    // console.log("doValidar");
     var caminos = {};
     if(angular.isUndefined(estado)){
       self.totalFinales = 0;
@@ -126,13 +106,13 @@ function Automata(struct){
     }
     if(cadena.length == 1) {
       self.totalFinales += self.contarFinales(this.getDestinos(estado, cadena));
-      self.agregarFinales(this.getDestinos(estado, cadena));
+      //self.agregarFinales(this.getDestinos(estado, cadena));
       var res = {};
       res[cadena] =  self.unir(self.getDestinos(estado, cadena));
       return res;
     }
     var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
-    if(estadosNuevos == false){
+    if(estadosNuevos == false){//Si no tiene destinos
       caminos[cadena.charAt(0)] = 'ε';
       return caminos;
     }
@@ -141,11 +121,12 @@ function Automata(struct){
       var first =  cadena.charAt(0);
       var resto = cadena.substr(1, cadena.length);
       if(angular.isUndefined(caminos[first])) caminos[first] = [];
-      caminos[first][v] = self.validarPalabra(resto, v)
+      caminos[first][v] = self.validarPalabra(resto, v)//Valida el resto de la palabra de forma recursiva
     });
     return caminos;
   }
 
+  //////////////// NO implementado /////////////
   //Genera un conjunto de coordenadas para posicionar los estados
   this.generarCoordenadas = function(){
     self.coordenadas.length = 0;
