@@ -15,6 +15,15 @@ App.controller('automatasController', ['$scope', function($scope){
   $scope.automata = {};
   $scope.coordenadas = [];
 
+  $scope.$watch('automataForm', function(o, n){
+    if(o!=n){
+      $scope.processForm();
+      $scope.validar();
+    }
+  },true);
+
+
+
   $scope.processForm = function(){
     var Δ = {};
     angular.forEach( $scope.automataForm.d.split('\n'), function(v,k){//Por cada transición
@@ -42,6 +51,7 @@ App.controller('automatasController', ['$scope', function($scope){
       });
     });
 
+    //Creo un nuevo automata con los datos ya extraidos
     $scope.automata = new Automata({
       q: $scope.automataForm.q.split(','),
       e: $scope.automataForm.e.split(','),
@@ -59,7 +69,6 @@ App.controller('automatasController', ['$scope', function($scope){
 
   $scope.check = function(){
     $scope.resultCheck = $scope.automata.getDestinosInversos($scope.est, $scope.ent);
-
   }
 
   $scope.getDatosTextarea = function(){
@@ -69,46 +78,29 @@ App.controller('automatasController', ['$scope', function($scope){
     $scope.automataForm.s = datos[2];
     $scope.automataForm.f = datos[3];
     $scope.automataForm.d = datos.slice(4,datos.length).join('\n');
-    console.log(datos);
-    //$scope.processForm();
   }
 
 
 
   $scope.showTipo = function(estado){//inicial y final
-
+    if(($scope.automataForm.f.indexOf(estado) !== -1) && ($scope.automataForm.s == estado)) return "*→";
     if(($scope.automataForm.f.indexOf(estado) !== -1)) return "*";
     if(($scope.automataForm.s == estado)) return "→";
   }
 
-  // getCoordenadas = function(estado){
-  //   console.log($('#e_'+estado));
-  // }
-  //
-  // getAllCoordenadas = function(){
-  //   $scope.coordenadas.length = 0;
-  //   angular.forEach($scope.automata.estados, function(estado){
-  //     getCoordenadas(estado);
-  //     //$scope.coordenadas.push()
-  //   });
-  // }
-
+  $scope.isValidPath = function(path){
+    return $scope.automata.esFinal(path.charAt(path.length-1));
+  }
 
 
   $scope.validar = function(){
+    if(angular.isUndefined($scope.cadena) || $scope.cadena.length == 0) return;
     $scope.transiciones.length = 0;
 
     $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
-    $scope.plano = $scope.automata.aplanar($scope.resultado);
+    $scope.caminos = $scope.automata.aplanar($scope.resultado);
     $scope.totalFinales = $scope.automata.totalFinales;
-    $scope.finalesAlc = $scope.automata.finalesAlcanzados;
-    console.log($scope.finalesAlc);
-    $scope.transiciones = $scope.automata.transiciones;
-    // $scope.automata.dibujar('automataPlot');
-    $scope.automata.getRutaInversa($scope.cadena,2);
-    $scope.reversa = $scope.automata.rutaInversa;
-    // $scope.resultado = validarPalabra($scope.cadena);
-    console.dir($scope.resultado);
+
   }
 
 

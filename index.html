@@ -5,6 +5,7 @@
     <title></title>
     <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="angular.min.js"></script>
+    <script type="text/javascript" src="f.js"></script>
     <script type="text/javascript" src="automata.js"></script>
     <script type="text/javascript" src="demo.js"></script>
     <!-- <script type="text/javascript" src="script.js"></script> -->
@@ -22,7 +23,7 @@
               </td>
               <td>
                 <button type="button" name="button" ng-click="getDatosTextarea()">Extraer</button>
-                <button type="button" name="button" ng-click="processForm()">Procesar</button>
+                <!-- <button type="button" name="button" ng-click="processForm()">Procesar</button> -->
               </td>
             </tr>
             <tr>
@@ -41,7 +42,6 @@
         </table>
       </div>
     </section>
-    <br>
     <section>
       <h2>Tabla de transición</h2>
       <div class="table-container">
@@ -50,7 +50,6 @@
           <tr>
             <th rowspan="2" style=" width: 84px;">Estado</th>
             <th colspan="{{automata.alfabeto.length}}">Entrada</th>
-            <!-- <th ng-repeat="entrada in automataWork.e">{{letra}}</th> -->
           </tr>
           <tr>
             <th ng-repeat="letra in automata.alfabeto"> {{letra}}</th>
@@ -59,57 +58,50 @@
         <tbody>
           <tr ng-repeat="transicion in automata.funcionTransicion">
             <td style="text-align:right">{{showTipo(automata.estados[$index])}} {{automata.estados[$index]}}</td>
-            <td ng-repeat="letra in automata.alfabeto">{{transicion[letra].join(',')}}</td>
+            <td ng-repeat="letra in automata.alfabeto">{{transicion[letra].join(',') || 'ε'}}</td>
             <!-- <td ng-repeat="funcion in transicion">{{transicion.}}</td> -->
           </tr>
         </tbody>
       </table>
     </div>
     </section>
-  <br>
-    <section>
+    <section class="c">
       <h2>Validación de palabra</h2>
 
-      <input type="text" ng-model="cadena"><button type="button" ng-click="validar()">Validar</button>
-      {{totalFinales}} <span ng-if="totalFinales">Es válida!</span> <span ng-if="!totalFinales">NO es válida!</span>
+      <input type="text" ng-model="cadena" class="checkerInput" placeholder="Palabra..." ng-change="validar()">
+      <!-- <br><button type="button" ng-click="validar()" class="btnV">Validar</button> -->
+      <br>
+      <span ng-if="totalFinales">Es válida!</span> <span ng-if="!totalFinales">NO es válida!</span><br>
+      Se alcanzaron {{totalFinales}} estados finales
+
     </section>
-  <br>
+
   <section>
-    <h2>Plano:</h2>
-    <pre>
-      {{plano | json}}
-    </pre>
-    <!-- <svg width="800" height="600" ng-if="coordenadas">
+    <h2>Caminos:</h2>
+    <div ng-repeat="camino in caminos" ng-class="{'valid':isValidPath(camino), 'invalid':!isValidPath(camino)}">
+      <span >{{$index+1}}.- {{camino}}</span>
+    </div>
+
+    <!-- <pre>
+      {{caminos | json}}
+    </pre> -->
+    <!--<svg width="800" height="600" ng-if="coordenadas">
         <circle ng-attr-cx="{{coordenadas[$index].x}}" ng-attr-cy="{{coordenadas[$index].y}}" r="40" stroke="black" stroke-width="2" fill="white" ng-repeat="estado in automata.estados" id=e_{{estado}}>  </circle>
         <text ng-attr-x="{{coordenadas[$index].x}}" ng-attr-y="{{coordenadas[$index].y}}" stroke="#676767" stroke-width="1px" dy=".4em"  dx="-5px" font-size="20" ng-repeat="estado in automata.estados">{{estado}}</text>
-
-    </svg> -->
+    </svg>-->
     <!-- <div class="estado" ng-repeat="estado in automata.estados" id=e_{{estado}}>
       {{estado}}
     </div> -->
     <!-- <canvas id="automataPlot" width="800" height="500"></canvas> -->
   </section>
-  <br>
+
     <section>
-      <pre>{{resultado | json:5}}</pre><br><br>
-      <pre>{{transiciones | json}}</pre>
+      <h2>Autómata (JSON):</h2>
+
+      <!-- <pre>{{resultado | json:5}}</pre><br><br> -->
+      <pre>{{automata | json:5}}</pre><br><br>
+      <!-- <pre>{{transiciones | json}}</pre> -->
     </section>
-    <!-- <button type="button" ng-click="processForm()">Procesar</button> -->
-
-
-    <!-- <pre>      {{file.data}}    </pre> -->
-    <!-- <textarea name="name" id="container_text" ></textarea> -->
-
-    <br>
-    <input type="text" ng-model="est" placeholder="Estado">
-    <input type="text" ng-model="ent" placeholder="Entrada">
-    <button type="button" ng-click="check()">Checar</button> -->
-    <span>{{resultCheck}}</span>
-    <br><br><br>
-    {{reversa}}
-
-    <!-- <pre>{{automata | json:4}}</pre><br><br> -->
-    <!-- <pre><code>{{automataWork | json:4}}</code></pre><br><br> -->
 
 
   </body>
