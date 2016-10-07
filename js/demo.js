@@ -112,8 +112,8 @@ App.controller('automatasController', ['$scope', function($scope){
   $scope.validar = function(){
     if(angular.isUndefined($scope.cadena) || $scope.cadena.length == 0) return;
     $scope.transiciones.length = 0;
-    // $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
-    $scope.resultado = $scope.automata.validarPalabraEpsilon($scope.cadena);
+    $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
+    // $scope.resultado = $scope.automata.validarPalabraEpsilon($scope.cadena);
 
     $scope.caminos = $scope.automata.aplanar($scope.resultado);
     $scope.totalFinales = $scope.automata.totalFinales;
