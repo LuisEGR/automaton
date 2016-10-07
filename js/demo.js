@@ -48,28 +48,22 @@ App.controller('automatasController', ['$scope', function($scope){
     var Δ = {};
     angular.forEach( $scope.automataForm.d.split('\n'), function(v,k){//Por cada transición
       var δ = v.split(','); // [a,1,d]
-      angular.forEach(  $scope.automataForm.q,function(v2,k2){//por cada estado
+      angular.forEach($scope.automataForm.q.split(',') ,function(v2,k2){//por cada estado
         // var r = {};
+        // console.log(v2);
         if(δ[0] == v2){
           if(angular.isUndefined(Δ[v2])) Δ[v2] = {};
           if(angular.isUndefined(Δ[v2][δ[1]])) Δ[v2][δ[1]] = [];//arreglo de estados destino, para los AFN
           Δ[v2][δ[1]].push(δ[2]);
+          // console.log("asdas");
         }
+
       });
+      // console.dir(δ);
     });
 
-    var Δi = {};
-    angular.forEach( $scope.automataForm.d.split('\n'), function(v,k){//Por cada transición
-      var δ = v.split(',').reverse(); // [a,1,d] -> [d,1,a]
-      angular.forEach(  $scope.automataForm.q,function(v2,k2){//por cada estado
-        // var r = {};
-        if(δ[0] == v2){
-          if(angular.isUndefined(Δi[v2])) Δi[v2] = {};
-          if(angular.isUndefined(Δi[v2][δ[1]])) Δi[v2][δ[1]] = [];//arreglo de estados destino, para los AFN
-          Δi[v2][δ[1]].push(δ[2]);
-        }
-      });
-    });
+    // console.log($scope.automataForm.d.split('\n'));
+
 
     //Creo un nuevo automata con los datos ya extraidos
     $scope.automata = new Automata({
@@ -77,13 +71,12 @@ App.controller('automatasController', ['$scope', function($scope){
       e: $scope.automataForm.e.split(','),
       s: $scope.automataForm.s,
       f: $scope.automataForm.f.split(','),
-      d: Δ,
-      di: Δi//inversa
+      d: Δ
     });
     //console.dir($scope.automata);
     $scope.automata.print(); // Consola
     // $scope.automata.dibujar('automataPlot');
-    $scope.coordenadas = $scope.automata.generarCoordenadas();
+    // $scope.coordenadas = $scope.automata.generarCoordenadas();
 
   }
 
@@ -111,15 +104,17 @@ App.controller('automatasController', ['$scope', function($scope){
 
   //Comprobar si el camino es válido
   $scope.isValidPath = function(path){
-    return $scope.automata.esFinal(path.charAt(path.length-1));
+    var estados = path.split('→');
+    return $scope.automata.esFinal(estados[estados.length-1]);
   }
 
   //Validar la cadena (Desde el objeto de automata)
   $scope.validar = function(){
     if(angular.isUndefined($scope.cadena) || $scope.cadena.length == 0) return;
     $scope.transiciones.length = 0;
+    // $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
+    $scope.resultado = $scope.automata.validarPalabraEpsilon($scope.cadena);
 
-    $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
     $scope.caminos = $scope.automata.aplanar($scope.resultado);
     $scope.totalFinales = $scope.automata.totalFinales;
 
@@ -136,7 +131,7 @@ var openFile = function(event) {
     var text = reader.result;
     var node = document.getElementById('output');
     $('#automata').val(text);
-    console.log(reader.result.substring(0, 200));
+    // console.log(reader.result.substring(0, 200));
   };
   reader.readAsText(input.files[0]);
 };

@@ -28,13 +28,15 @@ function Automata(struct){
   //Obtengo los destinos desde un estado con determinada entrada.
   this.getDestinos =  function(estado, entrada){
       // console.log("Get destino: " + estado + "("+entrada+")");
-      if(angular.isUndefined(this.funcionTransicion)) return false; //'ERROR_NO_ESTADO';
+      if(angular.isUndefined(this.funcionTransicion)) return false; //'ERROR_NO_FUNCION_TRANSICION';
       if(angular.isUndefined(this.funcionTransicion[estado])) return false; //'ERROR_NO_ESTADO';
       if(angular.isUndefined(this.funcionTransicion[estado][entrada+""])) return false;//'ERROR_NO_TRANSICION';
-      var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada+""].join('|');
-      self.transiciones.push(transition);
+      //var transition = estado+","+entrada+","+this.funcionTransicion[estado][entrada+""].join('|');
+      //self.transiciones.push(transition);
       return this.funcionTransicion[estado][entrada+""];
   }
+
+
 
   //Comprueba si un estado es estado final
   this.esFinal = function(estado){
@@ -126,31 +128,86 @@ function Automata(struct){
     return caminos;
   }
 
-  //////////////// NO implementado /////////////
-  //Genera un conjunto de coordenadas para posicionar los estados
-  this.generarCoordenadas = function(){
-    self.coordenadas.length = 0;
-    console.dir(self.estados);
-    // total = self.estados.length;
-    totalX = Math.floor(Math.sqrt(self.estados.length));
-    totalY = Math.ceil(Math.sqrt(self.estados.length));
-    console.dir(totalX);
-    console.dir(totalY);
-    if((totalX * totalY) < self.estados.length) totalX += (self.estados.length - (totalX * totalY));
-    for(var i = 0; i < totalX; i++){
-      for (var j = 0; j < totalY; j++) {
-        var coord = {
-          x: i*300 + 50,
-          y: j*250 + 50
+  //Función recursiva para validar una palabra con transiciones Epsilon, recibe como parametros
+  //la cadena y el estado, este último es opcional, y en caso de que no exista
+  //Se tomará el estado inicial.
+  this.validarPalabraEpsilon = function(cadena,estado){
+    var caminos = {};
+    var res = {};
+
+    if(angular.isUndefined(estado)){
+      self.totalFinales = 0;
+      self.transiciones.length = 0;
+      estado =  this.estadoI;//estado inicial
+      cadena = cadena+'e';//Entrada final como epsilon
+    }
+    if(cadena.length == 1) {
+      var dest_ = self.getDestinos(estado, cadena);
+      console.log("("+estado+","+cadena+") Destinos: "+dest_);
+      if(dest_ == false){ //si no hay transición con ese simbolo
+        dest_ = self.getDestinos(estado, 'e');//busco destinos con epsilon
+        console.log("Hay +"+dest_.length+"+transiciónes epsilon!");
+        if(dest_ != false){//si sí tiene destinos con epsilon
+          angular.forEach(dest_, function(estadoNuevo){//por cada nuevo destino,
+            if(angular.isUndefined(caminos[cadena+"_e"])) caminos[cadena+"_e"] = [];
+            caminos[cadena+"_e"][estadoNuevo] = self.validarPalabra(cadena, estadoNuevo);//valido la palabra
+          });
+          return caminos;
         }
-        self.coordenadas.push(coord);
       }
+      self.totalFinales += self.contarFinales(dest_);
+      res[cadena] =  self.unir(dest_);
+      return res;
+    }
+    var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
+    if(estadosNuevos == false){//Si no tiene destinos
+      estadosNuevos = self.getDestinos(estado, 'e');
+      console.log("Hay +"+estadosNuevos.length+"+transiciónes epsilon!");
+      if(estadosNuevos != false){
+        angular.forEach(estadosNuevos, function(estadoNuevo){//por cada nuevo destino,
+          if(angular.isUndefined(caminos[cadena.charAt(0)+"_e"])) caminos[cadena.charAt(0)+"_e"] = [];
+          caminos[cadena.charAt(0)+"_e"][estadoNuevo] = self.validarPalabra(cadena, estadoNuevo);//valido la palabra
+        });
+        return caminos;
+      }
+      caminos[cadena.charAt(0)] = 'ε';
+      return caminos;
     }
 
-    console.dir(self.coordenadas);
-    return self.coordenadas;
-
+    angular.forEach(estadosNuevos, function(v,k){
+      var first =  cadena.charAt(0);
+      var resto = cadena.substr(1, cadena.length);
+      if(angular.isUndefined(caminos[first])) caminos[first] = [];
+      caminos[first][v] = self.validarPalabra(resto, v)//Valida el resto de la palabra de forma recursiva
+    });
+    return caminos;
   }
+
+  //////////////// NO implementado /////////////
+  //Genera un conjunto de coordenadas para posicionar los estados
+  // this.generarCoordenadas = function(){
+  //   self.coordenadas.length = 0;
+  //   console.dir(self.estados);
+  //   // total = self.estados.length;
+  //   totalX = Math.floor(Math.sqrt(self.estados.length));
+  //   totalY = Math.ceil(Math.sqrt(self.estados.length));
+  //   console.dir(totalX);
+  //   console.dir(totalY);
+  //   if((totalX * totalY) < self.estados.length) totalX += (self.estados.length - (totalX * totalY));
+  //   for(var i = 0; i < totalX; i++){
+  //     for (var j = 0; j < totalY; j++) {
+  //       var coord = {
+  //         x: i*300 + 50,
+  //         y: j*250 + 50
+  //       }
+  //       self.coordenadas.push(coord);
+  //     }
+  //   }
+  //
+  //   console.dir(self.coordenadas);
+  //   return self.coordenadas;
+  //
+  // }
 
   // this.dibujar = function(canvasID){
   //     var c=document.getElementById(canvasID);
