@@ -99,89 +99,110 @@ function Automata(struct){
   //Función recursiva para validar una palabra, recibe como parametros
   //la cadena y el estado, este último es opcional, y en caso de que no exista
   //Se tomará el estado inicial.
+  // this.validarPalabra = function(cadena,estado){
+  //   var caminos = {};
+  //   if(angular.isUndefined(estado)){
+  //     self.totalFinales = 0;
+  //     self.transiciones.length = 0;
+  //     estado =  this.estadoI;//estado inicial
+  //   }
+  //   if(cadena.length == 1) {
+  //     self.totalFinales += self.contarFinales(this.getDestinos(estado, cadena));
+  //     //self.agregarFinales(this.getDestinos(estado, cadena));
+  //     var res = {};
+  //     res[cadena] =  self.unir(self.getDestinos(estado, cadena));
+  //     return res;
+  //   }
+  //   var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
+  //   if(estadosNuevos == false){//Si no tiene destinos
+  //     caminos[cadena.charAt(0)] = 'ε';
+  //     return caminos;
+  //   }
+  //
+  //   angular.forEach(estadosNuevos, function(v,k){
+  //     var first =  cadena.charAt(0);
+  //     var resto = cadena.substr(1, cadena.length);
+  //     if(angular.isUndefined(caminos[first])) caminos[first] = [];
+  //     caminos[first][v] = self.validarPalabra(resto, v)//Valida el resto de la palabra de forma recursiva
+  //   });
+  //   return caminos;
+  // }
+  //
+
+
+
+
+
+
+
+
   this.validarPalabra = function(cadena,estado){
     var caminos = {};
+    var res = {};
     if(angular.isUndefined(estado)){
       self.totalFinales = 0;
       self.transiciones.length = 0;
       estado =  this.estadoI;//estado inicial
     }
-    if(cadena.length == 1) {
-      self.totalFinales += self.contarFinales(this.getDestinos(estado, cadena));
-      //self.agregarFinales(this.getDestinos(estado, cadena));
-      var res = {};
-      res[cadena] =  self.unir(self.getDestinos(estado, cadena));
-      return res;
-    }
+    console.log("Validando palabra '"+cadena+"' desde el estado '"+estado+"' ");
     var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
     if(estadosNuevos == false){//Si no tiene destinos
-      caminos[cadena.charAt(0)] = 'ε';
-      return caminos;
-    }
-
-    angular.forEach(estadosNuevos, function(v,k){
-      var first =  cadena.charAt(0);
-      var resto = cadena.substr(1, cadena.length);
-      if(angular.isUndefined(caminos[first])) caminos[first] = [];
-      caminos[first][v] = self.validarPalabra(resto, v)//Valida el resto de la palabra de forma recursiva
-    });
-    return caminos;
-  }
-
-  //Función recursiva para validar una palabra con transiciones Epsilon, recibe como parametros
-  //la cadena y el estado, este último es opcional, y en caso de que no exista
-  //Se tomará el estado inicial.
-  this.validarPalabraEpsilon = function(cadena,estado){
-    var caminos = {};
-    var res = {};
-
-    if(angular.isUndefined(estado)){
-      self.totalFinales = 0;
-      self.transiciones.length = 0;
-      estado =  this.estadoI;//estado inicial
-      cadena = cadena+'e';//Entrada final como epsilon
-    }
-    if(cadena.length == 1) {
-      var dest_ = self.getDestinos(estado, cadena);
-      console.log("("+estado+","+cadena+") Destinos: "+dest_);
-      if(dest_ == false){ //si no hay transición con ese simbolo
-        dest_ = self.getDestinos(estado, 'e');//busco destinos con epsilon
-        console.log("Hay +"+dest_.length+"+transiciónes epsilon!");
-        if(dest_ != false){//si sí tiene destinos con epsilon
-          angular.forEach(dest_, function(estadoNuevo){//por cada nuevo destino,
-            if(angular.isUndefined(caminos[cadena+"_e"])) caminos[cadena+"_e"] = [];
-            caminos[cadena+"_e"][estadoNuevo] = self.validarPalabra(cadena, estadoNuevo);//valido la palabra
-          });
-          return caminos;
+      if(cadena.charAt(0) != 'E'){
+        console.log("1.Validando en '"+estado+"'con E"+cadena);
+        console.log("cadena long: "+cadena.length);
+        caminos = self.validarPalabra('E'+cadena, estado);
+      }else{
+        caminos[cadena.charAt(0)] = estado;
+        f = self.getDestinos(estado, cadena.charAt(0));
+        console.log("Hey "+f);
+        console.log("cadena long: "+cadena.length);
+        if(cadena.length >= 2){
+            caminos[cadena.charAt(0)] = 'ε';
         }
       }
-      self.totalFinales += self.contarFinales(dest_);
-      res[cadena] =  self.unir(dest_);
-      return res;
-    }
-    var estadosNuevos = self.getDestinos(estado, cadena.charAt(0));//Tomo el primer caracter y lo mando como entrada
-    if(estadosNuevos == false){//Si no tiene destinos
-      estadosNuevos = self.getDestinos(estado, 'e');
-      console.log("Hay +"+estadosNuevos.length+"+transiciónes epsilon!");
-      if(estadosNuevos != false){
-        angular.forEach(estadosNuevos, function(estadoNuevo){//por cada nuevo destino,
-          if(angular.isUndefined(caminos[cadena.charAt(0)+"_e"])) caminos[cadena.charAt(0)+"_e"] = [];
-          caminos[cadena.charAt(0)+"_e"][estadoNuevo] = self.validarPalabra(cadena, estadoNuevo);//valido la palabra
-        });
-        return caminos;
-      }
-      caminos[cadena.charAt(0)] = 'ε';
-      return caminos;
+    }else{
+      angular.forEach(estadosNuevos, function(estado){
+        var first =  cadena.charAt(0);
+        var resto = cadena.substr(1, cadena.length);
+        console.log("Cadena: "+ cadena);
+        console.log("First: "+first);
+        console.log("Resto: "+resto);
+        if(angular.isUndefined(caminos[first])) caminos[first] = [];
+        if(resto.length > 0){
+          console.log("2.Validando en '"+estado+"'con "+resto);
+          caminos[first][estado] = self.validarPalabra(resto, estado)//Valida el resto de la palabra de forma recursiva
+        }else{
+          console.log("3.Validando en '"+estado+"'con E");
+          caminos[first][estado] = self.validarPalabra('E', estado);//Valida el resto de la palabra de forma recursiva
+
+
+        }
+
+      });
     }
 
-    angular.forEach(estadosNuevos, function(v,k){
-      var first =  cadena.charAt(0);
-      var resto = cadena.substr(1, cadena.length);
-      if(angular.isUndefined(caminos[first])) caminos[first] = [];
-      caminos[first][v] = self.validarPalabra(resto, v)//Valida el resto de la palabra de forma recursiva
-    });
     return caminos;
-  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   //////////////// NO implementado /////////////
   //Genera un conjunto de coordenadas para posicionar los estados
