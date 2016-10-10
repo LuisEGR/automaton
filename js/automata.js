@@ -6,8 +6,9 @@ function Automata(struct){
   this.estadoI = struct.s;
   this.estadosF = struct.f;
   this.funcionTransicion = struct.d;
+  this.transiciones = struct.d_;
   this.funcionInversa = struct.di;
-  this.transiciones = [];
+  // this.transiciones = [];
   this.totalFinales = 0;
   this.finalesAlcanzados = [];
   self.coordenadas = [];
@@ -185,99 +186,120 @@ function Automata(struct){
 }
 
 
+  self.simplificarTransiciones = function(){
+    var newTransitions = [];
+    for(var i = 0; i < self.transiciones.length; i++){
+      var fT = self.transiciones[i].split(',');
+      if(fT[0] == fT[2]){//Si va hacia si mismo
+        newTransitions.push(fT[1]);
+      }
+    }
+  }
 
 
 
+  self.draw = function(){
+
+    // Create a new directed graph
+    // var g = new dagreD3.graphlib.Graph().setGraph({});
+    var g = new dagreD3.graphlib.Graph().setGraph({rankdir: 'LR'});
+
+    // States and transitions from RFC 793
+    var estados = self.estados;
+    estados.forEach(function(estado) {
+      g.setNode(estado, { label: estado,shape: "circle", style:"fill:#fff;stroke-width:1px; stroke:#333" });
+    });
+
+    for(var i = 0; i < self.transiciones.length; i++){
+      if(self.transiciones[i] != ""){
+        var fT = self.transiciones[i].split(',');
+        var actual = fT[0];
+        var entrada = fT[1];
+        var destino = fT[2];
+        g.setEdge(actual, destino, {label: entrada, lineInterpolate: 'basis' });
+      }
+    }
+
+    // Set some general styles
+    // g.nodes().forEach(function(v) {
+    //   var node = g.node(v);
+    //   node.rx = node.ry = 10;
+    // });
+
+    // Add some custom colors based on state
+    g.node(self.estadoI).style = "fill: #ff9a7b;stroke-width:1px; stroke:#333";
+    self.estadosF.forEach(function(estado){
+      g.node(estado).style = "fill: #37decf;stroke-width:1px; stroke:#333";
+    });
+
+    // g.node('ESTAB').style = "fill: #7f7";
+
+    var svg = d3.select("svg"),
+        inner = svg.select("g");
+
+    // Set up zoom support
+    var zoom = d3.behavior.zoom().on("zoom", function() {
+          inner.attr("transform", "translate(" + d3.event.translate + ")" +
+                                      "scale(" + d3.event.scale + ")");
+        });
+    svg.call(zoom);
+
+    // Create the renderer
+    var render = new dagreD3.render();
+
+
+    // Run the renderer. This is what draws the final graph.
+    render(inner, g);
+
+    // Center the graph
+    var initialScale =1;
+    zoom
+      .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
+      .scale(initialScale)
+      .event(svg);
+    svg.attr('height', g.graph().height * initialScale + 40);
+  }
 
 
 
+    self.draw();
+
+}
 
 
+function _flat(target, opts) {
+  opts = opts || {}
 
+  var delimiter = opts.delimiter || '→'
+  var maxDepth = opts.maxDepth
+  var output = {}
 
+  function step(object, prev, currentDepth) {
+    currentDepth = currentDepth ? currentDepth : 1
+    Object.keys(object).forEach(function(key) {
+      var value = object[key]
+      var isarray = opts.safe && Array.isArray(value)
+      var type = Object.prototype.toString.call(value)
 
+      var isobject = (
+        type === "[object Object]" ||
+        type === "[object Array]"
+      )
 
+      var newKey = prev
+        ? prev + delimiter + key
+        : key
 
+      if (!isarray && isobject && Object.keys(value).length &&
+        (!opts.maxDepth || currentDepth < maxDepth)) {
+        return step(value, newKey, currentDepth + 1)
+      }
 
+      output[newKey] = value
+    })
+  }
 
+  step(target)
 
-
-
-
-  //////////////// NO implementado /////////////
-  //Genera un conjunto de coordenadas para posicionar los estados
-  // this.generarCoordenadas = function(){
-  //   self.coordenadas.length = 0;
-  //   console.dir(self.estados);
-  //   // total = self.estados.length;
-  //   totalX = Math.floor(Math.sqrt(self.estados.length));
-  //   totalY = Math.ceil(Math.sqrt(self.estados.length));
-  //   console.dir(totalX);
-  //   console.dir(totalY);
-  //   if((totalX * totalY) < self.estados.length) totalX += (self.estados.length - (totalX * totalY));
-  //   for(var i = 0; i < totalX; i++){
-  //     for (var j = 0; j < totalY; j++) {
-  //       var coord = {
-  //         x: i*300 + 50,
-  //         y: j*250 + 50
-  //       }
-  //       self.coordenadas.push(coord);
-  //     }
-  //   }
-  //
-  //   console.dir(self.coordenadas);
-  //   return self.coordenadas;
-  //
-  // }
-
-  // this.dibujar = function(canvasID){
-  //     var c=document.getElementById(canvasID);
-  //     var ctx=c.getContext("2d");
-  //     ctx.clearRect(0, 0, c.width, c.height);//limpiar
-  //     ctx.beginPath();
-  //     var x = 0;
-  //     var y = 0;
-  //     var separation = 200;
-  //     var estados = [];
-  //     for(var i = 0; i < self.estados.length; i++){
-  //       //get position
-  //       if(i == 0){
-  //         x = 30;
-  //         y = 30;
-  //       }else{
-  //         if((x+separation) < (c.width + 10)){
-  //           x = x+separation;
-  //         }else{
-  //           y = y+separation;
-  //           x = 30;
-  //           moveTo(x,y);
-  //         }
-  //       }
-  //       estados.push({e: self.estados[i], pos: {x:x, y:y}});
-  //       ctx.moveTo(x+30, y);
-  //       ctx.arc(x,y,30,0,2*Math.PI);
-  //       //ctx.fill();
-  //       ctx.closePath();
-  //       //ctx = c.getContext("2d");
-  //       ctx.moveTo(x, y);
-  //       ctx.textAlign="center";
-  //       ctx.fillStyle = 'black';
-  //       ctx.font = "30px Montserrat ";
-  //       ctx.fillText(self.estados[i],x ,y + 8);
-  //
-  //     }
-  //     ctx.stroke();
-  //     console.dir(estados);
-  //
-  //     // ctx.arc(100,75,30,0,2*Math.PI);
-  //     // ctx.fillStyle = 'white';
-  //     // ctx.fill();
-  //     // ctx.fillStyle = 'black';
-  //     // ctx.font = "30px Montserrat";
-  //     // ctx.fillText("1",100 -10 ,75 + 8);
-  //
-  //
-  //
-  // }
-
+  return output
 }

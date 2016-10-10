@@ -71,6 +71,7 @@ App.controller('automatasController', ['$scope', function($scope){
       e: $scope.automataForm.e.split(','),
       s: $scope.automataForm.s,
       f: $scope.automataForm.f.split(','),
+      d_: $scope.automataForm.d.split('\n'),
       d: Δ
     });
     //console.dir($scope.automata);
@@ -108,16 +109,20 @@ App.controller('automatasController', ['$scope', function($scope){
     return $scope.automata.esFinal(estados[estados.length-1]);
   }
 
+
+
+
   //Validar la cadena (Desde el objeto de automata)
   $scope.validar = function(){
     if(angular.isUndefined($scope.cadena) || $scope.cadena.length == 0) return;
     $scope.transiciones.length = 0;
     $scope.resultado = $scope.automata.validarPalabra($scope.cadena);
+    $scope.caminos = $scope.automata.aplanar($scope.resultado);
+    // $scope.resultado = $scope.automata.draw();
     // $scope.resultado = $scope.automata.validarPalabraEpsilon($scope.cadena);
     // $scope.resultado = $scope.automata.validarPalabraEpsilon2($scope.cadena);
 
 
-    $scope.caminos = $scope.automata.aplanar($scope.resultado);
     $scope.totalFinales = $scope.automata.totalFinales;
 
   }
